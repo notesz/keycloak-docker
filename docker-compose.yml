@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+
+  keycloak_database:
+    image: mysql:latest
+    container_name: ${APP_NAME}_database
+    ports:
+      - ${DB_PORT}:3306
+    volumes:
+      - "./data/mysql:/var/lib/mysql"
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      - keycloak_network
+
+  keycloak_keycloak:
+    container_name: ${APP_NAME}_keycloak
+    env_file:
+      - .env
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+      args:
+        - KC_DB=${KC_DB}
+        - KC_DB_URL=${KC_DB_URL}
+        - KC_DB_USERNAME=${KC_DB_USERNAME}
+        - KC_DB_PASSWORD=${KC_DB_PASSWORD}
+        - KC_HOSTNAME=${KC_HOSTNAME}
+        - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+        - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      - ${APP_PORT}:8080
+    volumes:
+      - "./data/keycloak/providers:/opt/keycloak/providers"
+      - "./data/keycloak/themes:/opt/keycloak/themes"
+    restart: always
+    depends_on:
+      - ${APP_NAME}_database
+    networks:
+      - keycloak_network
+
+networks:
+  keycloak_network:
+    driver: bridge

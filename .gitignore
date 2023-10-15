@@ -1,0 +1,6 @@
+.idea
+data/*
+!data/keycloak/providers/.gitkeep
+!data/keycloak/themes/.gitkeep
+!data/mysql/.gitkeep
+.env
